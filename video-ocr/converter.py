@@ -32,7 +32,7 @@ while test_vid.isOpened():
 
     if(index%100 == 0):
         #assign a name for our files 
-        name = './image_frames2/frame' + str(index/100) + '.png'
+        name = './image_frames/frame' + str(int(index/100)) + '.png'
         
         #assign our print statement
         print ('Extracting frames...' + name)
