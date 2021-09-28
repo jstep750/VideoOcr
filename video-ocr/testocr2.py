@@ -18,8 +18,8 @@ import numpy as np
 
 string = ''
 
-for i in range(0,10):
-    frame = './image_frames/frame' + str(i) + '.png'
+for i in range(0,27):
+    frame = './image_frames2/frame' + str(i) + '.png'
     demo = Image.open(frame)
     text = pytesseract.image_to_string(demo, lang = 'eng')
     string = string + text
