@@ -22,7 +22,8 @@ for i in range(0,27):
     frame = './image_frames2/frame' + str(i) + '.png'
     demo = Image.open(frame)
     text = pytesseract.image_to_string(demo, lang = 'eng')
-    string = string + text
+    br = '\n-------------------------------'+str(i)+'-----------------------------------\n'
+    string = string + br + text
 
 print(string)
 
