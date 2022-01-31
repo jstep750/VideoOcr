@@ -110,7 +110,7 @@ def same_reservednum(str1, str2):
     'public', 'try', 'char', 'for', 'register', 'typedef', 'class', 'friend', 'return', 'union', 
     'const', 'goto', 'short', 'unsigned', 'continue', 'if', 'signed', 'virtual', 'default', 
     'inline', 'sizeof', 'void', 'delete', 'int', 'static', 'volatile', 'do', 'long', 'struct', 'while', 
-    'true', 'false','++', '--', '+=', '-=', '—=', '*=', '/=', '<=', '=>', '==', '!=']
+    'true', 'false','++', '--', '+=', '-=', '*=', '/=', '<=', '=>', '==', '!=']
 
     reserved_num1 = []
     reserved_num2 = []
@@ -149,6 +149,8 @@ def union_code(lines, txt):
     multi_sim_index = {} #유사한 라인 인덱스 저장. 유사한 라인이 여러개인 것이 중복으로 나올 수 있으므로
     temp_sim_index = [] # multi_sim_index에 추가 될 리스트.
     is_start_line = True #첫 번째 시작줄은 다르게 적용된다.
+    before_lines = []
+
     for (j_idx, j) in enumerate(txt):
         found = False
         append = True
@@ -184,6 +186,7 @@ def union_code(lines, txt):
                             for line in multi_sim_index:
                                 # if len(multi_sim_index[line]["index"]) == 0: #유사한 줄 없는 것만 (있는 건 추가를 안하는 방향으로) -> 버리는 것은 없는 것이 더 좋다.
                                 lines.append([multi_sim_index[line]["txt"]]) # lines 뒤에 붙인다. (or 모두 잘못된 것이라 판단하고 버리는 방법도 있다.)
+                                
                         else: # 아니면 판단 다음 줄로 보류.
                             temp_sim_index.clear() #정리. 
                             pass
@@ -243,88 +246,21 @@ def union_code(lines, txt):
                                 found = True
                                 #print('found',idx, diff, j)
                         if(found): break
-                if(found and append): lines[idx].append(j) #found만 true일때는 너무 유사하므로 추가 x (이미 있다고 판단)
-            if(found == False):
-                ############################################  한줄 뒤까지 보고 있으면 앞에 삽입
-                if(j_idx < len(txt)-1 and (len(j1) != 1 or not ('{'in j1 or'}'in j1))):
-                    nextj = txt[j_idx+1]
-                    nextj1 = ' '.join(nextj.split())
-                    if(len(nextj1) != 1 or not ('{'in nextj1 or'}'in nextj1)):  # '{' '}'만 있으면 그냥 다음줄에 넣음 (탐색X)
-                        for (i,line) in enumerate(lines):
-                            #print(i, idx, lines[idx])
-                            if(i >= idx):
-                                for l in line:
-                                    diff = get_difference_score(nextj, l)
-                                    if(diff < 8):
-                                        if(diff < 4): 
-                                            append = False
-                                        idx = i
-                                        #print('found', idx, diff, j, l)
-                                        found = True
-                                if(found): break
-                    if(found and append): 
-                        lines[idx].append(nextj)
-                        lines.insert(idx-1, [j])
-                    elif(found):
-                        lines.insert(idx-1, [j])    
-                #############################################
-                if(found == False):
-                    idx += 1
-                    #print('insert', idx, j)
-                    lines.insert(idx,[j])
-    
-    return lines
-
-
-'''def union_code(lines, txt):
-    idx = 0
-    for (j_idx, j) in enumerate(txt):
-        found = False
-        append = True
-        j1 = ' '.join(j.split())
-        if(len(j1) != 1 or not ('{'in j1 or'}'in j1)):  # '{' '}'만 있으면 그냥 다음줄에 넣음 (탐색X)
-            for (i,line) in enumerate(lines):
-                if(i >= idx):
-                    for l in line:
-                        diff = get_difference_score(j, l)
-                        if(diff < 8):
-                            if(diff < 4): 
-                                append = False
-                            idx = i
-                            #print('found', idx, diff, j, l)
-                            found = True
-                    if(found): break
-        if(found and append): lines[idx].append(j)
-        elif(found == False):
-            ############################################  한줄 뒤까지 보고 있으면 앞에 삽입
-            if(j_idx < len(txt)-1 and (len(j1) != 1 or not ('{'in j1 or'}'in j1))):
-                nextj = txt[j_idx+1]
-                nextj1 = ' '.join(nextj.split())
-                if(len(nextj1) != 1 or not ('{'in nextj1 or'}'in nextj1)):  # '{' '}'만 있으면 그냥 다음줄에 넣음 (탐색X)
-                    for (i,line) in enumerate(lines):
-                        if(i >= idx):
-                            for l in line:
-                                diff = get_difference_score(nextj, l)
-                                if(diff < 8):
-                                    if(diff < 2): 
-                                        append = False
-                                    idx = i
-                                    if(') return true;' in j):
-                                        print('found', idx, diff, j, l)
-                                    found = True
-                            if(found): break
                 if(found and append): 
-                    lines[idx].append(nextj)
-                    lines.insert(idx-1, [j])
-                elif(found):
-                    lines.insert(idx-1, [j])
-            #############################################
+                    lines[idx].append(j) #found만 true일때는 너무 유사하므로 추가 x (이미 있다고 판단)
+                if(found):
+                    for b in before_lines:
+                        lines.insert(idx, [b])  #idx전에 삽입
+                        idx += 1
+                    before_lines.clear()
+                        
             if(found == False):
-                idx += 1
-                #print('insert', idx, j)
-                lines.insert(idx,[j])
-    
-    return lines'''
+                before_lines.append(j)
+
+    for b in before_lines:
+        idx += 1
+        lines.insert(idx,[b]) #idx 뒤에 삽입
+    return lines
 
 
 
@@ -355,26 +291,31 @@ def rm_blank_bf_period(str, startspace_num):
     find_point = startspace_num+1
     while True:
         point1 = str.find('"')
-        point2 = str.find('"', point1+1)
-        index = str.find('.', find_point)
+        point2 = str.find('"', point1 + 1)
+        index = str.find(' ', find_point)
         while index > point2:
             point1 = str.find('"', point2 + 1)
-            point2 = str.find('"', point1+1)
+            point2 = str.find('"', point1 + 1)
             if point2 == -1 or point1 == -1:
                 break
         if index > point1 and index < point2:
             find_point = point2
             continue
+        
         if index == -1:
             break
-        if str[index - 1] == ' ':
-            str = str[:index - 1 ] + str[index : ]
+
+        if str[index - 1] == '.':
+            str = str[:index ] + str[index + 1 : ]
+        elif index == len(str) - 1:
+            break
+        elif str[index + 1] == '.':
+            str = str[:index] + str[index + 1 : ]
+            find_point = startspace_num
         else:
             find_point = index+1
-    return str    
+    return str
 
-
-# check = ['@','#','//','£','|']
 def correct_code(txt):
     reserved = 0
     for str in txt:
@@ -455,13 +396,18 @@ def correct_code(txt):
 
 
 
-txt0 = ''' #include <string> 
- #include <vector> 
- using namespace std; 
- string solution(string new_id)  { 
-     string answer =  **;          I 
-     return answer; 
- } 
+txt0 = ''' #include  <string> 
+ #tinclude <vector> 
+ using  namespace std; 
+                                                 I 
+  int solution(string  s) { 
+      int answer = s. length(); 
+      for (int  i=1; i <  s.length()/2;  +i)  { 
+          int pos =  0; 
+          int  len = s.length(); 
+          for (  53) { 
+          } 
+      1 
 '''
 txt0 = txt0.splitlines()
 txt0 = correct_code(txt0)
@@ -469,15 +415,16 @@ txt0 = correct_code(txt0)
 for i in txt0:
     print(i)
 
-txt1 = ''' #include <string> 
- #include <vector> 
- using namespace std; 
- string solution(string  new_id)- { 
-     string answer =  ""; 
-     for (char ch  : new_id) { 
-     } 
-     return answer; 
- } 
+txt1 = ''' using  namespace std; 
+  int solution(string  s) { 
+      int answer = s. length(); 
+      for (int  i=1; i <= s.length()/2:  +i)  { 
+          int pos =  0;                 I 
+          int  len = s. length(); 
+          for (  53) { 
+              string  unit = s.substr(pos,  i); 
+          } 
+      } 
 '''
 txt1 = txt1.splitlines()
 txt1 = correct_code(txt1)
@@ -497,39 +444,17 @@ for i in answer:
     print(i)
 
 
-#print(get_difference_score('     for  (int i=l; | <= s.length()/2; +i)  { ', '    for (int i=l; | <= s.length()/2: +i) { '))
-
-txt2 = ''' #include <string> 
- #include <vector> 
- using namespace  std; 
- bool isvalid(char  c) { 
-     if  (isalnum(c)) return  true; 
-     if  (c =  1   [Il  c=  "'_" || ¢ =  "'".") return true; 
-     return  false; 
- } 
- string solution(string  new_id)  { 
-     string  answer = ""; 
-     for  (char ch : new_id)  { 
-'''
-txt2 = txt2.splitlines()
-txt2 = correct_code(txt2)
-
-print('-----------------------------------')
-answer = union_code(res, txt2)
-for i in answer:
-    print(i)
-
-txt3 = '''     if (isalnum(c))  return true; 
-     if{(c="'-"||lc="'_"]|]       c=   ".") return  true; 
-     return false; 
- } 
- string solution(string  new_id) { 
-     string answer =  ""; 
-     for (char ch  : new_id) { 
-     } 
-     return answer; 
- } 
- |          T 
+txt3 = '''  int solution(string  s) { 
+      int answer =  s. length(); 
+      for (int  i=l; i <= s.length()/2;  +i)  { 
+          int pos =  0; 
+          int  len = s.length(); 
+          for (  53) { 
+              string  unit = s.substr(pos,  i);                   I 
+              pos +=  i; 
+               if (pos >= s.length())  break; 
+               int cnt = 0; 
+              for  ( 5:) { 
 '''
 txt3 = txt3.splitlines()
 txt3 = correct_code(txt3)
@@ -540,19 +465,17 @@ for i in answer:
     print(i)
 
 
-
-txt4 = '''     if(c="'-"|]]c="'_          ||] c=  "."') return true; 
-     return  false; 
- } 
- string solution(string  new_id) { 
-     string answer  = ""; 
-     for (char  ch : new_id) { 
-         if  (isvalid(ch) =  false)  continue; 
-         if  (ch="."){ 
-              if (answer .length() =   0) continue;  I 
-         } 
-         ch =  tolower(ch); 
-         on mm amt son or wmanemlh bhawlsf kL % 
+txt4 = '''         IIL TG = Oslin   g 
+         for ( 53) { 
+            string unit = s.substr(pos, i); 
+            pos += i; 
+             if (pos >= s.length()) break; 
+             int cnt = 0; 
+            for ( 53) { 
+                if (unit.compare(s.substr(pos, i)) = 0) { 
+                    tnt   5 
+                    pos += i; 
+                } else { 
 '''
 txt4 = txt4.splitlines()
 txt4 = correct_code(txt4)
@@ -563,20 +486,18 @@ for i in answer:
     print(i)
 
 
-txt5 = '''     bool lastDot = false; 
-     for (char ch : new_id) { 
-         if (isvalid(ch) =   false) continue; 
-         if (ch="."){ 
-             if (answer.length() ==  0 || lastDot) continue; 
-             lastDot = true; 
-         } else { 
-             lastDot, = false; 
-         } 
-         ch = tolower(ch); 
-         answer .push_back(ch); 
-     } 
-     return answer; 
- 1 
+txt5 = '''      for (int i=1; i <= s.length()/2; +i)   { 
+          int pos = 0; 
+          int len = s. length(); 
+          for ( 53) { 
+              string unit = s.substr(pos,  i); 
+              pos += i; 
+              if (pos >= s.length()) break; 
+                                     I 
+              int cnt = 0; 
+              for ( 5;) { 
+                  if (unit.compare(s.substr(pos,  i)) =  0) { 
+                      +cnt 
 '''
 txt5 = txt5.splitlines()
 txt5 = correct_code(txt5)
@@ -587,22 +508,49 @@ for i in answer:
     print(i)
 
 
-txt6 = '''             if  (answer.length() == 0  || lastDot) continue; 
-             lastDot  = true; 
-         } else { 
-             lastDot  = false; 
-         } 
-         ch = tolower(ch); 
-         answer .push_back(ch); 
-     } 
-     return answer; 
- }
+txt6 = '''          for ( 53) { 
+              string unit = s.substr(pos,  i); 
+              pos += i;  I 
+              if (pos >= s.length())  break; 
+              int cnt = 0; 
+              for ( 53) { 
+                  if (unit.compare(s.substr(pos,  i)) =  0)  { 
+                      +cnt; 
+                      pos +=  i; 
+                  } else { 
+                      break; 
+                  } 
 '''
 txt6 = txt6.splitlines()
 txt6 = correct_code(txt6)
 
 print('-----------------------------------')
 answer = union_code(res, txt6)
+for i in answer:
+    print(i)
+
+
+txt7 = '''                  if (unit.compare(s.substr(pos, i)) = 0) { 
+                     +cnt 
+                     pos += i; 
+                 } else { 
+                     break; 
+                 } 
+             } 
+              if (cnt > 0) { 
+                  len = i * cnt;  1 
+                  len += 1; 
+             } 
+         } 
+     } 
+
+'''
+txt7 = txt7.splitlines()
+txt7 = correct_code(txt7)
+
+
+print('-----------------------------------')
+answer = union_code(res, txt7)
 for i in answer:
     print(i)
 
@@ -625,7 +573,8 @@ def select_startspace(line):
         line1 = [' '.join(line[0].split())]
         for str in line[1:]:
             str1 = ' '.join(str.split())
-            if(get_difference_score(line1[0], str1)>2):
+        
+            if(get_difference_score(line1[0], str1)>=1):
                 select = False
     else: select = False
 
@@ -666,7 +615,7 @@ def delete_code(answer):
             if(cur_space - prev_space > 8): #이전 줄과 시작이 9칸이상 차이나면 삭제
                 delete = True
                 dnum = 1
-            elif(idx > 0 and get_difference_score(prev_line[0], str) < 4):  #이전 줄과 너무 비슷하면 삭제
+            elif(idx > 0 and get_difference_score(prev_line[0], str) < 3):  #이전 줄과 너무 비슷하면 삭제
                 delete = True
                 dnum = 4
             else: 
@@ -716,31 +665,6 @@ for i in answer:
     print(i)
 
 
-
-
-def rm_blank_bf_period(str, startspace_num):
-    find_point = startspace_num+1
-    while True:
-        point1 = str.find('"')
-        point2 = str.find('"', point1+1)
-        index = str.find('.', find_point)
-        while index > point2:
-            point1 = str.find('"', point2 + 1)
-            point2 = str.find('"', point1+1)
-            if point2 == -1 or point1 == -1:
-                break
-        if index > point1 and index < point2:
-            find_point = point2
-            continue
-        if index == -1:
-            break
-        if str[index - 1] == ' ':
-            str = str[:index - 1 ] + str[index : ]
-        else:
-            find_point = index+1
-    return str    
-
-
 def make_result(answer):
     res = ''
     for line in answer:
@@ -753,5 +677,7 @@ def make_result(answer):
 
 print(make_result(answer))
 
+print(rm_blank_bf_period('int answer = s. length();', 0))
 
-print(rm_blank_bf_period('if (answer .length() =   0) continue;  I ', 0))
+
+

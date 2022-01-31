@@ -57,6 +57,21 @@ def compare_alphabets_num(str1, str2):
     return result
 
 
+def same_reservednum(str1, str2):
+    reserved = ['asm', 'double', 'new',	'switch', 'auto', 'else', 'operator', 'template',  
+    'break', 'enum', 'private', 'this', 'case', 'extern', 'protected', 'throw', 'catch', 'float', 
+    'public', 'try', 'char', 'for', 'register', 'typedef', 'class', 'friend', 'return', 'union', 
+    'const', 'goto', 'short', 'unsigned', 'continue', 'if', 'signed', 'virtual', 'default', 
+    'inline', 'sizeof', 'void', 'delete', 'int', 'static', 'volatile', 'do', 'long', 'struct', 'while', 
+    '++', '--', '+=', '-=', '—=', '*=', '/=', '<=', '=>', '==', '!=']
+
+    same_reserved = 0
+
+    for w in reserved:
+        if(w in str1 and w in str2): same_reserved += 1    
+    return same_reserved
+
+
 
 def get_substr(str1, str2):
     len_t = len(str1)
@@ -104,34 +119,13 @@ def get_LCS(str1, str2):
 
     return result
 
-def same_reservednum(str1, str2):
-    reserved = ['asm', 'double', 'new',	'switch', 'auto', 'else', 'operator', 'template',  
-    'break', 'enum', 'private', 'this', 'case', 'extern', 'protected', 'throw', 'catch', 'float', 
-    'public', 'try', 'char', 'for', 'register', 'typedef', 'class', 'friend', 'return', 'union', 
-    'const', 'goto', 'short', 'unsigned', 'continue', 'if', 'signed', 'virtual', 'default', 
-    'inline', 'sizeof', 'void', 'delete', 'int', 'static', 'volatile', 'do', 'long', 'struct', 'while', 
-    'true', 'false','++', '--', '+=', '-=', '—=', '*=', '/=', '<=', '=>', '==', '!=']
-
-    reserved_num1 = []
-    reserved_num2 = []
-    same_reserved = 0
-
-    for (i,w) in enumerate(reserved):
-        reserved_num1.append(str1.count(w))
-        reserved_num2.append(str2.count(w))
-    
-    for (c1,c2) in zip(reserved_num1, reserved_num2):
-        same_reserved += min(c1, c2)
-        
-    return same_reserved
-
 
 def get_difference_score(str1, str2):
     diff = 0
-    diff += compare_start_space(str1, str2) * 2    #시작 공백 수
+    diff += compare_start_space(str1, str2) * 2     #시작 공백 수
     diff += compare_brackets_num(str1, str2) * 2    #괄호 종류별 개수
-    diff += compare_alphabets_num(str1, str2)   #알파벳 종류별 개수
-    #diff -= same_reservednum(str1, str2) * 3
+    diff += compare_alphabets_num(str1, str2)    #알파벳 종류별 개수
+    #diff -= same_reservednum(str1, str2) * 10
 
     str1 = ' '.join(str1.split())   #공백 여러개를 한개로 바꿈
     str2 = ' '.join(str2.split())
@@ -149,19 +143,19 @@ def union_code(lines, txt):
     multi_sim_index = {} #유사한 라인 인덱스 저장. 유사한 라인이 여러개인 것이 중복으로 나올 수 있으므로
     temp_sim_index = [] # multi_sim_index에 추가 될 리스트.
     is_start_line = True #첫 번째 시작줄은 다르게 적용된다.
-    for (j_idx, j) in enumerate(txt):
+    for j in txt:
         found = False
         append = True
         if (multi_sim_check): # 첫 라인 검사 시 전체 검사, 유사한 라인이 여러개 일 때 추가 검토 필요.
-            #print("sim!", multi_sim_index)
             for (i,line) in enumerate(lines):
                 for l in line:
                     diff = get_difference_score(j, l)
-                    if(diff < 8):
-                        if(diff < 4): 
+                    if(diff < 10):
+                        if(diff < 5): 
                             append = False
                         idx = i
                         found = True
+                        #print(idx, j)
                 if (found): # 유사한 라인 발견 시 temp_sim_index에 해당 line 인덱스 추가.
                     temp_sim_index.append(i)
                     found = False
@@ -172,7 +166,6 @@ def union_code(lines, txt):
                 "append" : append,
             }
             sim_n = len(temp_sim_index)
-            #print('sim_n', sim_n, temp_sim_index)
             if sim_n == 0: # 없으면 .. 
                 if (is_start_line): # 첫 라인일 때 없으면 다음줄로 판단 보류.
                     temp_sim_index.clear() #정리.
@@ -230,101 +223,23 @@ def union_code(lines, txt):
                         pass  
                     
         else: #기존
-            j1 = ' '.join(j.split())
-            if(len(j1) != 1 or not ('{'in j1 or'}'in j1)):  # '{' '}'만 있으면 그냥 다음줄에 넣음 (탐색X)
-                for (i,line) in enumerate(lines):
-                    if(i >= idx):
-                        for l in line:
-                            diff = get_difference_score(j, l)
-                            if(diff < 8):
-                                if(diff < 4): 
-                                    append = False
-                                idx = i
-                                found = True
-                                #print('found',idx, diff, j)
-                        if(found): break
-                if(found and append): lines[idx].append(j) #found만 true일때는 너무 유사하므로 추가 x (이미 있다고 판단)
-            if(found == False):
-                ############################################  한줄 뒤까지 보고 있으면 앞에 삽입
-                if(j_idx < len(txt)-1 and (len(j1) != 1 or not ('{'in j1 or'}'in j1))):
-                    nextj = txt[j_idx+1]
-                    nextj1 = ' '.join(nextj.split())
-                    if(len(nextj1) != 1 or not ('{'in nextj1 or'}'in nextj1)):  # '{' '}'만 있으면 그냥 다음줄에 넣음 (탐색X)
-                        for (i,line) in enumerate(lines):
-                            #print(i, idx, lines[idx])
-                            if(i >= idx):
-                                for l in line:
-                                    diff = get_difference_score(nextj, l)
-                                    if(diff < 8):
-                                        if(diff < 4): 
-                                            append = False
-                                        idx = i
-                                        #print('found', idx, diff, j, l)
-                                        found = True
-                                if(found): break
-                    if(found and append): 
-                        lines[idx].append(nextj)
-                        lines.insert(idx-1, [j])
-                    elif(found):
-                        lines.insert(idx-1, [j])    
-                #############################################
-                if(found == False):
-                    idx += 1
-                    #print('insert', idx, j)
-                    lines.insert(idx,[j])
-    
-    return lines
-
-
-'''def union_code(lines, txt):
-    idx = 0
-    for (j_idx, j) in enumerate(txt):
-        found = False
-        append = True
-        j1 = ' '.join(j.split())
-        if(len(j1) != 1 or not ('{'in j1 or'}'in j1)):  # '{' '}'만 있으면 그냥 다음줄에 넣음 (탐색X)
             for (i,line) in enumerate(lines):
                 if(i >= idx):
                     for l in line:
                         diff = get_difference_score(j, l)
-                        if(diff < 8):
-                            if(diff < 4): 
+                        if(diff < 10):
+                            if(diff < 5): 
                                 append = False
                             idx = i
-                            #print('found', idx, diff, j, l)
                             found = True
+                            #print(idx, j)
                     if(found): break
-        if(found and append): lines[idx].append(j)
-        elif(found == False):
-            ############################################  한줄 뒤까지 보고 있으면 앞에 삽입
-            if(j_idx < len(txt)-1 and (len(j1) != 1 or not ('{'in j1 or'}'in j1))):
-                nextj = txt[j_idx+1]
-                nextj1 = ' '.join(nextj.split())
-                if(len(nextj1) != 1 or not ('{'in nextj1 or'}'in nextj1)):  # '{' '}'만 있으면 그냥 다음줄에 넣음 (탐색X)
-                    for (i,line) in enumerate(lines):
-                        if(i >= idx):
-                            for l in line:
-                                diff = get_difference_score(nextj, l)
-                                if(diff < 8):
-                                    if(diff < 2): 
-                                        append = False
-                                    idx = i
-                                    if(') return true;' in j):
-                                        print('found', idx, diff, j, l)
-                                    found = True
-                            if(found): break
-                if(found and append): 
-                    lines[idx].append(nextj)
-                    lines.insert(idx-1, [j])
-                elif(found):
-                    lines.insert(idx-1, [j])
-            #############################################
-            if(found == False):
+            if(found and append): lines[idx].append(j) #found만 true일때는 너무 유사하므로 추가 x (이미 있다고 판단)
+            elif(found == False):
                 idx += 1
-                #print('insert', idx, j)
                 lines.insert(idx,[j])
     
-    return lines'''
+    return lines
 
 
 
@@ -350,29 +265,6 @@ def get_reservednum(str):
         if(w in str): num += 1    
     return num
     
-
-def rm_blank_bf_period(str, startspace_num):
-    find_point = startspace_num+1
-    while True:
-        point1 = str.find('"')
-        point2 = str.find('"', point1+1)
-        index = str.find('.', find_point)
-        while index > point2:
-            point1 = str.find('"', point2 + 1)
-            point2 = str.find('"', point1+1)
-            if point2 == -1 or point1 == -1:
-                break
-        if index > point1 and index < point2:
-            find_point = point2
-            continue
-        if index == -1:
-            break
-        if str[index - 1] == ' ':
-            str = str[:index - 1 ] + str[index : ]
-        else:
-            find_point = index+1
-    return str    
-
 
 # check = ['@','#','//','£','|']
 def correct_code(txt):
@@ -447,7 +339,6 @@ def correct_code(txt):
                 newstr = newstr.replace(change_brackets, brackets[idx+1])     #stack의 top이 open이면 close로 바꿔줌
                 b_stack.pop()
         
-        newstr = rm_blank_bf_period(newstr, cur_startspace)
         if(append): ret.append(newstr)
         if(len(skipstr)!=0): print('skip', skipstr)
 
@@ -465,6 +356,7 @@ txt0 = ''' #include <string>
 '''
 txt0 = txt0.splitlines()
 txt0 = correct_code(txt0)
+
 
 for i in txt0:
     print(i)
@@ -549,7 +441,7 @@ txt4 = '''     if(c="'-"|]]c="'_          ||] c=  "."') return true;
      for (char  ch : new_id) { 
          if  (isvalid(ch) =  false)  continue; 
          if  (ch="."){ 
-              if (answer .length() =   0) continue;  I 
+              if (answer.length() =   0) continue;  I 
          } 
          ch =  tolower(ch); 
          on mm amt son or wmanemlh bhawlsf kL % 
@@ -606,7 +498,6 @@ answer = union_code(res, txt6)
 for i in answer:
     print(i)
 
-
 def remove_string(str):
     found = re.findall(r'''(?x)(?<!\\)".*?(?<!\\)"''', str)
     for f in found:
@@ -625,14 +516,16 @@ def select_startspace(line):
         line1 = [' '.join(line[0].split())]
         for str in line[1:]:
             str1 = ' '.join(str.split())
-            if(get_difference_score(line1[0], str1)>2):
+            if(get_difference_score(line1[0], str1)>=2):
                 select = False
     else: select = False
 
     if(select):
-        line.sort(key=lambda x : get_startspace(x))
-        print('select', int(len(line)/2), ':', line)
-        return [line[int(len(line)/2)]]
+        str1 = ' '.join(line[0].split())
+        if len(str1)==1 and ('{' in str1 or '}'in str1):
+            line.sort(key=lambda x : get_startspace(x))
+            print('select', int(len(line)/2), ':', line)
+            return [line[int(len(line)/2)]]
     return line
 
 
@@ -651,9 +544,8 @@ def delete_code(answer):
     # 글자수가 1~4글자인데 +,-,*,/,= 등 없으면 제거
     res = []
     prev_space = get_startspace(answer[0][0])
-    prev_line = answer[0]
 
-    for (idx, line) in enumerate(answer):
+    for line in answer:
         line = select_startspace(line)
         line = select_code(line)
         li = []
@@ -666,19 +558,12 @@ def delete_code(answer):
             if(cur_space - prev_space > 8): #이전 줄과 시작이 9칸이상 차이나면 삭제
                 delete = True
                 dnum = 1
-            elif(idx > 0 and get_difference_score(prev_line[0], str) < 4):  #이전 줄과 너무 비슷하면 삭제
-                delete = True
-                dnum = 4
+
             else: 
+                prev_space = cur_space
                 str1 = ' '.join(str.split())
                 # reserved word가 하나도 없고 "",괄호 안 제외했을 때 단어 6개이상이면 제거 or //로 시작하면 제거
                 if(str1.startswith('//')): delete = True
-                
-                elif(len(str1)==1 and '}' in str1):
-                    if(cur_space > prev_space):
-                        delete = True
-                        dnum = 5
-
                 elif(len(str1) > 5):
                     if(get_reservednum(str1) == 0):
                         tmp = remove_bracket(str1)
@@ -697,15 +582,11 @@ def delete_code(answer):
                         delete = True
                         dnum = 3
 
-            if not delete: 
-                li.append(str)
-
+            if not delete: li.append(str)
             else: print('delete', dnum, str)
 
         if(len(li) != 0):
             res.append(li)
-            prev_line = li
-            prev_space = cur_space
     
     return res
 
@@ -714,44 +595,3 @@ print('-----------------------------------')
 answer = delete_code(answer)
 for i in answer:
     print(i)
-
-
-
-
-def rm_blank_bf_period(str, startspace_num):
-    find_point = startspace_num+1
-    while True:
-        point1 = str.find('"')
-        point2 = str.find('"', point1+1)
-        index = str.find('.', find_point)
-        while index > point2:
-            point1 = str.find('"', point2 + 1)
-            point2 = str.find('"', point1+1)
-            if point2 == -1 or point1 == -1:
-                break
-        if index > point1 and index < point2:
-            find_point = point2
-            continue
-        if index == -1:
-            break
-        if str[index - 1] == ' ':
-            str = str[:index - 1 ] + str[index : ]
-        else:
-            find_point = index+1
-    return str    
-
-
-def make_result(answer):
-    res = ''
-    for line in answer:
-        res += line[0]+'\n'
-        if(len(line) > 1):
-            for str in line[1:]:
-                res += '//'+str+'\n'
-
-    return res
-
-print(make_result(answer))
-
-
-print(rm_blank_bf_period('if (answer .length() =   0) continue;  I ', 0))

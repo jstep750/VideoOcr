@@ -454,29 +454,36 @@ def correct_code(txt):
     return ret
 
 
-
-txt0 = ''' #include <string> 
- #include <vector> 
- using namespace std; 
- string solution(string new_id)  { 
-     string answer =  **;          I 
-     return answer; 
- } 
-'''
+txt0 = ''' package kakaol; 
+ public class MainApp { 
+d   public static void main(String[] args) { 
+        int   n= 5; 
+        int[] arr1 = {9, 20, 28, 18, 11}; 
+        int[] arr2 = {30, 1, 21, 17, 28}; 
+        J/[THEEE  "8 % 47, “HE  27, "# #",  CHE] 
+        String[] result = new String[n]; 
+    } 
+ } '''
 txt0 = txt0.splitlines()
 txt0 = correct_code(txt0)
+
 
 for i in txt0:
     print(i)
 
-txt1 = ''' #include <string> 
- #include <vector> 
- using namespace std; 
- string solution(string  new_id)- { 
-     string answer =  ""; 
-     for (char ch  : new_id) { 
-     } 
-     return answer; 
+txt1 = '''package kakaol; 
+public class MainApp { 
+~   public static void main(String[] args) { 
+        int  n= 5; 
+        int[] arr1 = {9, 20, 28, 18, 11}; 
+        int[] arr2 = {30, 1, 21, 17, 28}; 
+        J/[THEER  "8 % #7, “HEE #7, "# #0", CHE] 
+        String[] result = new String[n]; 
+        for(int 1 = 8; 1 < n; i++) { 
+            int arr = arr1[i] | arr2[i]; J 
+           NR 
+        } 
+    } 
  } 
 '''
 txt1 = txt1.splitlines()
@@ -498,19 +505,13 @@ for i in answer:
 
 
 #print(get_difference_score('     for  (int i=l; | <= s.length()/2; +i)  { ', '    for (int i=l; | <= s.length()/2: +i) { '))
-
-txt2 = ''' #include <string> 
- #include <vector> 
- using namespace  std; 
- bool isvalid(char  c) { 
-     if  (isalnum(c)) return  true; 
-     if  (c =  1   [Il  c=  "'_" || ¢ =  "'".") return true; 
-     return  false; 
- } 
- string solution(string  new_id)  { 
-     string  answer = ""; 
-     for  (char ch : new_id)  { 
-'''
+txt2 = '''X= 2'E Z4Zt He HER AoE Of QULCH 
+ER Xo  Zt FIZE0M & 222 1 SY EEE2 022 25313 If A X|= OF 
+zt Holrt 
+  BM:      own      -  o 
+|           EEUIUGEEL 
+'Y  |       [EESSUIEE 
+   tJ       00      - 13   EB '''
 txt2 = txt2.splitlines()
 txt2 = correct_code(txt2)
 
@@ -519,17 +520,22 @@ answer = union_code(res, txt2)
 for i in answer:
     print(i)
 
-txt3 = '''     if (isalnum(c))  return true; 
-     if{(c="'-"||lc="'_"]|]       c=   ".") return  true; 
-     return false; 
- } 
- string solution(string  new_id) { 
-     string answer =  ""; 
-     for (char ch  : new_id) { 
-     } 
-     return answer; 
- } 
- |          T 
+
+txt3 = ''' package kakaol; 
+ public class MainApp { 
+~   public static void main(String[] args) { 
+        int   n= 5; 
+        int[] arr1 = {9, 20, 28, 18, 11}; 
+        int[] arr2 = {30, 1, 21, 17, 28}; 
+        JI[ HEE"   "8 # £7, “HER £7, "8 #",  “HEE"] 
+        String[] result = new String[n]; 
+        for(int 1 = 8; 1 < n; i++) { 
+            int arr = arri[i] | arr2[i]; 
+            System.out.printin("® + Integer,   tqh; 
+        }                                       SoBinarySuingank argo) : Suing - Inkeger 
+     }                                       &  toHexString(Int arg) : String - Integer 
+                                             & toOctalString(int arg0) : String - Integer 
+ }                                           &  tostring(int arg0) : String - Integer 
 '''
 txt3 = txt3.splitlines()
 txt3 = correct_code(txt3)
@@ -539,20 +545,20 @@ answer = union_code(res, txt3)
 for i in answer:
     print(i)
 
-
-
-txt4 = '''     if(c="'-"|]]c="'_          ||] c=  "."') return true; 
-     return  false; 
- } 
- string solution(string  new_id) { 
-     string answer  = ""; 
-     for (char  ch : new_id) { 
-         if  (isvalid(ch) =  false)  continue; 
-         if  (ch="."){ 
-              if (answer .length() =   0) continue;  I 
-         } 
-         ch =  tolower(ch); 
-         on mm amt son or wmanemlh bhawlsf kL % 
+txt4 = '''package kakaol; 
+public class MainApp { 
+~   public static void main(String[] args) { 
+       int   n= 5; 
+       int[] arr1 = {9, 20, 28, 18, 11}; 
+       int[] arr2 = {30, 1, 21, 17, 28}; 
+       AN   ual     #8,  TERE ET, TR RET, THESENT] 
+       String[] result = new String[n]; 
+       for(int 1 = 0; 1 < n; i+) { 
+           int arr = arri[i] | arr2[i]; 
+           System. out printin(E" + Ireger ESSARY)       | 
+       } 
+    } 
+} 
 '''
 txt4 = txt4.splitlines()
 txt4 = correct_code(txt4)
@@ -562,49 +568,6 @@ answer = union_code(res, txt4)
 for i in answer:
     print(i)
 
-
-txt5 = '''     bool lastDot = false; 
-     for (char ch : new_id) { 
-         if (isvalid(ch) =   false) continue; 
-         if (ch="."){ 
-             if (answer.length() ==  0 || lastDot) continue; 
-             lastDot = true; 
-         } else { 
-             lastDot, = false; 
-         } 
-         ch = tolower(ch); 
-         answer .push_back(ch); 
-     } 
-     return answer; 
- 1 
-'''
-txt5 = txt5.splitlines()
-txt5 = correct_code(txt5)
-
-print('-----------------------------------')
-answer = union_code(res, txt5)
-for i in answer:
-    print(i)
-
-
-txt6 = '''             if  (answer.length() == 0  || lastDot) continue; 
-             lastDot  = true; 
-         } else { 
-             lastDot  = false; 
-         } 
-         ch = tolower(ch); 
-         answer .push_back(ch); 
-     } 
-     return answer; 
- }
-'''
-txt6 = txt6.splitlines()
-txt6 = correct_code(txt6)
-
-print('-----------------------------------')
-answer = union_code(res, txt6)
-for i in answer:
-    print(i)
 
 
 def remove_string(str):
@@ -625,8 +588,10 @@ def select_startspace(line):
         line1 = [' '.join(line[0].split())]
         for str in line[1:]:
             str1 = ' '.join(str.split())
-            if(get_difference_score(line1[0], str1)>2):
+        
+            if(get_difference_score(line1[0], str1)>=1):
                 select = False
+            else: print(get_difference_score(line1[0], str1), line1[0], str1)
     else: select = False
 
     if(select):
@@ -666,7 +631,7 @@ def delete_code(answer):
             if(cur_space - prev_space > 8): #이전 줄과 시작이 9칸이상 차이나면 삭제
                 delete = True
                 dnum = 1
-            elif(idx > 0 and get_difference_score(prev_line[0], str) < 4):  #이전 줄과 너무 비슷하면 삭제
+            elif(idx > 0 and get_difference_score(prev_line[0], str) < 3):  #이전 줄과 너무 비슷하면 삭제
                 delete = True
                 dnum = 4
             else: 
@@ -716,31 +681,6 @@ for i in answer:
     print(i)
 
 
-
-
-def rm_blank_bf_period(str, startspace_num):
-    find_point = startspace_num+1
-    while True:
-        point1 = str.find('"')
-        point2 = str.find('"', point1+1)
-        index = str.find('.', find_point)
-        while index > point2:
-            point1 = str.find('"', point2 + 1)
-            point2 = str.find('"', point1+1)
-            if point2 == -1 or point1 == -1:
-                break
-        if index > point1 and index < point2:
-            find_point = point2
-            continue
-        if index == -1:
-            break
-        if str[index - 1] == ' ':
-            str = str[:index - 1 ] + str[index : ]
-        else:
-            find_point = index+1
-    return str    
-
-
 def make_result(answer):
     res = ''
     for line in answer:
@@ -753,5 +693,3 @@ def make_result(answer):
 
 print(make_result(answer))
 
-
-print(rm_blank_bf_period('if (answer .length() =   0) continue;  I ', 0))

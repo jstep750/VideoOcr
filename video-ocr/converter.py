@@ -51,6 +51,7 @@ while test_vid.isOpened():
     if not ret:
         break
 
+    print(index, start_frame_num)
     if(index>start_frame_num and index<end_frame_num):
         #assign a name for our files 
         name = './image_frames/frame' + str(int(index)) + '.png'
@@ -58,8 +59,6 @@ while test_vid.isOpened():
         #assign our print statement
         print ('Extracting frames...' + name)
         cv2.imwrite(name, frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
 
     index = index + 1
     

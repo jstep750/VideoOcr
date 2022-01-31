@@ -57,7 +57,7 @@ class VideoSegmentFinder:
         Is the min. number of pixel changes between two adjacent video frames for the two to be considered distinct
     """
 
-    def __init__(self, threshold=20, min_change=7000 , max_change=20000):
+    def __init__(self, threshold=20, min_change=8000 , max_change=20000):
         self.threshold = threshold
         self.min_change = min_change
         self.max_change = max_change
@@ -90,6 +90,20 @@ class VideoSegmentFinder:
         )
         return selected_frames
 
+    def resize(self, image, width, height):
+        por = width*height/250000
+        size = (round(width*por), round(height * por))
+        image = cv2.resize(image,  dsize=size, interpolation=cv2.INTER_LINEAR)
+        return image
+
+    def background_color(self, image):
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        thresh = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[0]
+        if thresh <= 145: # 검은 배경
+            return 1
+        else: # 흰 배경
+            return 0
+
     def get_segment_frames_with_stats(self, video_file, save_stats_for_all_frames=True):
         ''' Returns a list of frames for the best possible video segments (refer to get_best_segment_frames())
         
@@ -117,86 +131,125 @@ class VideoSegmentFinder:
         fps = int(video_reader.get(cv2.CAP_PROP_FPS))
         print(fps)
 
-        frame_num = 0
+        frame_num = -1
         frame_num_to_stats = {}
         selected_frames = {}
 
         width = (video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))   
         height  = (video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))   
 
-        h = float(0.41243459526008003)
+
+        end_time = 1042
+        start_time = 457
+        h = float(0.6116497368155547)
+        w = float(0.6518351804956946)
+        x = float(0.3481648195043055)
+        y = float(0.3678311290919041)
+
+        '''h = float(0.663258935539254)
+        w = float(0.6891708008980637)
+        x = float(0.3108291991019363)
+        y = float(0.3055252068050569)
+        start_time = 300
+        end_time = 639'''
+
+        '''h = float(0.41243459526008003)
         w = float(0.6902123730378579)
         x = float(0.2812211445273895)
         y = float(0.14212065407394983)
         start_time = 345
-        end_time = 712
+        end_time = 645'''
+
+        '''x = float(0.3477020317256139)
+        y = float(0.38044326517871074)
+        w = float(0.652297968274386)
+        h = float(0.5883408771656001)
+        start_time = 440
+        end_time = 740'''
 
         start_frame_num = cal_time_to_frame(start_time, fps)
         end_frame_num = cal_time_to_frame(end_time, fps)
         print(start_frame_num, end_frame_num)
-
-        prev_timestamp = 0
-        prev_frame = 255 * np.ones(
-            (frame_height, frame_width, 3), np.uint8
-        )  # A blank screen
-        prev_frame = prev_frame[int(height*y): int(height*(y + h)), int(width*x): int(width*(x + w))]
-
-        prev_video_changes = PastFrameChangesTracker()
+        print(h*height, w*width)
 
         video_reader.set(cv2.CAP_PROP_POS_FRAMES, start_frame_num -1)
-        frame_num = start_frame_num -1
+        prev_timestamp = 0
 
+        pos = h*height*w*width / 400000
+
+        self.min_change = self.min_change * pos
+        self.max_change = self.max_change * pos
+        
         while video_reader.isOpened():
 
-            is_read, cur_frame = video_reader.read()
-            cur_frame = cur_frame[int(height*y): int(height*(y + h)), int(width*x): int(width*(x + w))]
-            #cur_frame = np.array(cur_frame)
-                        
-            timestamp = video_reader.get(cv2.CAP_PROP_POS_MSEC)
+            is_read = video_reader.grab()
+            #is_read, cur_frame = video_reader.read()
+            if(frame_num == -1):
+                is_read, cur_frame = video_reader.retrieve()
+                prev_frame = cur_frame[int(height*y): int(height*(y + h)), int(width*x): int(width*(x + w))]
+                frame_num = start_frame_num
 
-            # Is when the stream is ending
-            if not is_read:
-                break
+                #첫프레임 저장
+                selected_frames[frame_num] = {
+                    "timestamp": prev_timestamp,
+                    "frame": prev_frame,
+                    "next_frame": cur_frame,
+                    "mask": prev_frame,
+                    "num_pixels_changed": 0,
+                }
+            
+            else:
+                timestamp = video_reader.get(cv2.CAP_PROP_POS_MSEC)
 
-            if(frame_num>end_frame_num):
-                break
+                # Is when the stream is ending
+                if not is_read:
+                    break
 
-            if(frame_num%(fps/2)==0 and frame_num>start_frame_num and frame_num<end_frame_num):
-                #print(frame_num)
-                results = self.__compare_frames__(prev_frame, cur_frame)
+                if(frame_num>end_frame_num):
+                    break
 
-                # Store the results
-                if save_stats_for_all_frames:
-                    frame_num_to_stats[frame_num] = {
-                        "timestamp": timestamp,
-                        "num_pixels_changed": results["num_pixels_changed"],
-                    }
+                if(frame_num%(fps/2)==0 and frame_num>start_frame_num and frame_num<end_frame_num):
+                    #print(frame_num)
+                    is_read, cur_frame = video_reader.retrieve()
+                    cur_frame = cur_frame[int(height*y): int(height*(y + h)), int(width*x): int(width*(x + w))]
 
-                has_changed = results["num_pixels_changed"] > self.min_change
-                has_changed2 = results["num_pixels_changed"] < self.max_change
-                save_frame = False
+                    
+                    results = self.__compare_frames__(prev_frame, cur_frame)
 
-                #if prev_video_changes.are_previous_frames_stable() and has_changed and has_changed2:
-                if has_changed and has_changed2:
-                    save_frame = True
+                    # Store the results
+                    if save_stats_for_all_frames:
+                        frame_num_to_stats[frame_num] = {
+                            "timestamp": timestamp,
+                            "num_pixels_changed": results["num_pixels_changed"],
+                        }
 
-                if save_frame:
-                    selected_frames[frame_num] = {
-                        "timestamp": prev_timestamp,
-                        "frame": prev_frame,
-                        "next_frame": cur_frame,
-                        "mask": results["mask"],
-                        "num_pixels_changed": results["num_pixels_changed"],
-                    }
+                    has_changed = results["num_pixels_changed"] > self.min_change
+                    has_changed2 = results["num_pixels_changed"] < self.max_change
+                    save_frame = False
 
-                prev_video_changes.add_frame_change(has_changed)
+                    #if prev_video_changes.are_previous_frames_stable() and has_changed and has_changed2:
+                    if has_changed and has_changed2:
+                        save_frame = True
+                        print('save!')
 
-                prev_frame = cur_frame
-                prev_timestamp = timestamp
+                    if save_frame:
+                        selected_frames[frame_num] = {
+                            "timestamp": prev_timestamp,
+                            "frame": prev_frame,
+                            "next_frame": cur_frame,
+                            "mask": results["mask"],
+                            "num_pixels_changed": results["num_pixels_changed"],
+                        }
+
+                    #prev_video_changes.add_frame_change(has_changed)
+                    #if has_changed2:
+                    prev_frame = cur_frame
+                    prev_timestamp = timestamp
 
             frame_num += 1
 
         # Add the last frame of the video
+        
         selected_frames[frame_num] = {
             "timestamp": prev_timestamp,
             "frame": prev_frame,
@@ -214,14 +267,11 @@ class VideoSegmentFinder:
             cur_frame = selected_frames[selected_frame_nums[i]]
             next_frame = selected_frames[selected_frame_nums[i + 1]]
 
-            if (next_frame["timestamp"] - cur_frame["timestamp"]) < 2000:
+            if (next_frame["timestamp"] - cur_frame["timestamp"]) < 4500:
                 del selected_frames[selected_frame_nums[i + 1]]
                 i += 1
 
             i += 1
-
-        # Edge case: delete the first selected frame since it is just a blank screen
-        del selected_frames[selected_frame_nums[0]]
 
         video_reader.release()
         cv2.destroyAllWindows()
