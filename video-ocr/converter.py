@@ -20,7 +20,7 @@ if not os.path.exists('image_frames'):
 #  create our video path
 vidpath = os.path.join(os.getcwd(),'Downloads')
 #test_vid = cv2.VideoCapture('testvideo.mp4')
-test_vid = cv2.VideoCapture(os.path.join(vidpath,'e9273173533245009d2a6adc2700b32e.mp4'))
+test_vid = cv2.VideoCapture(os.path.join(vidpath,'fd576ad482d94cff8c0ae7dd60a403e9.mp4'))
 
 # start our index or count for  the frames
 

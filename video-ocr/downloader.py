@@ -19,10 +19,8 @@ def move_video_to(internal_video_path, destination_dir):
 
 
 
-url = 'https://www.youtube.com/watch?v=eW878Rmr8wY'
+url = 'https://www.youtube.com/watch?v=bPgIRk5C3jo'
 file_md5sum = uuid.uuid4().hex
-
-youtube = YouTube(url)
 
 youtube = YouTube(url)
 stream = youtube.streams.filter(adaptive=True).first()
@@ -34,4 +32,6 @@ stream.download(vidpath, file_md5sum)
 file_md5sum = move_video_to(
     os.path.join(vidpath, file_md5sum),vidpath)
 
+print(vidpath)
+print(file_md5sum)
 print('end')

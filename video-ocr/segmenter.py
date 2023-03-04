@@ -1,11 +1,11 @@
 import os
 import cv2
-from segment_finder import VideoSegmentFinder
+from segment_finder0 import VideoSegmentFinder
 video_segment_finder = VideoSegmentFinder()
 
 # Get the selected frames
 print('Getting selected frames')
-selected_frames_data = video_segment_finder.get_best_segment_frames('Downloads/e9273173533245009d2a6adc2700b32e.mp4')
+selected_frames_data = video_segment_finder.get_best_segment_frames('Downloads/fd576ad482d94cff8c0ae7dd60a403e9.mp4')
 frame_nums = sorted(selected_frames_data.keys())
 selected_frames = [selected_frames_data[i]["frame"] for i in frame_nums]
 
